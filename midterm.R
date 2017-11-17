@@ -3,11 +3,11 @@ library(boot)
 
 
 
-set_10_2 <- matrix(rep(rinvgauss(10, mean = 5, shape = 2), 2000), nrow = 2000)
+set_10_2 <- matrix(replicate(2000, rinvgauss(10, mean = 5, shape = 2)), nrow = 2000)
 set_25_2 <- rinvgauss(25, mean = 5, shape = 2)
 set_50_2 <- rinvgauss(50, mean = 5, shape = 2)
-set_100_2 <- rinvgauss(100, mean = 5, shape = 2)
-set_500_2 <- matrix(rep(rinvgauss(500, mean = 5, shape = 2), 2000), nrow = 2000)
+set_100_2 <- matrix(replicate(2000, expr = rinvgauss(100, mean = 5, shape = 2)), nrow = 2000)
+set_500_2 <- matrix(replicate(2000, expr = rinvgauss(500, mean = 5, shape = 2)), nrow = 2000)
 
 
 set_10_4 <- rinvgauss(10, mean = 5, shape = 4)
@@ -29,8 +29,8 @@ set_500_8 <- rinvgauss(500, mean = 5, shape = 8)
 set_10_12 <- rinvgauss(10, mean = 5, shape = 12)
 set_25_12 <- rinvgauss(25, mean = 5, shape = 12)
 set_50_12 <- rinvgauss(50, mean = 5, shape = 12)
-set_100_12 <- rinvgauss(100, mean = 5, shape = 12)
-set_500_12 <- rinvgauss(500, mean = 5, shape = 12)
+set_100_12 <- matrix(replicate(2000, expr = rinvgauss(100, mean = 5, shape = 12)), nrow = 2000)
+set_500_12 <- matrix(replicate(2000, expr = rinvgauss(500, mean = 5, shape = 12)), nrow = 2000)
 
 
 
@@ -53,16 +53,20 @@ loglikinvgaus <- function(data, par){
   j <- -(sum(1/2*log(lambda) - 1/2*(log(2*pi))  -3/2*log(data)) - lambda/(2*mu^2)*sum((data-mu)^2/data))
   }
 
-
-for(i in 1:10){
+correct <- NULL
+for(i in c(1:2000)){
+  dit <- set_10_2[i,]
 #finding MLE optims
-k <- optim(c(5,2), loglikinvgaus, data = set_500_2[i,], hessian = T)
+k <- optim(c(5,2), loglikinvgaus, data = dit, hessian = T, method = 'L-BFGS-B', lower = c(.5,.5), upper = c(100,100))
 vcov <- solve(k$hessian)
 
 #confidence interval
 upper <- k$par[1] + 1.96*vcov[1,1]
 lower <- k$par[1] - 1.96*vcov[1,1]
 
-count[i] <- 5 < upper & 5 > lower
+correct[i] <- 5 < upper & 5 > lower
 }
 
+
+
+sum(correct)/2000
