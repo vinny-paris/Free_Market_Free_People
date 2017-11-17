@@ -7,7 +7,7 @@ set_10_2 <- matrix(rep(rinvgauss(10, mean = 5, shape = 2), 2000), nrow = 2000)
 set_25_2 <- rinvgauss(25, mean = 5, shape = 2)
 set_50_2 <- rinvgauss(50, mean = 5, shape = 2)
 set_100_2 <- rinvgauss(100, mean = 5, shape = 2)
-set_500_2 <- rinvgauss(500, mean = 5, shape = 2)
+set_500_2 <- matrix(rep(rinvgauss(500, mean = 5, shape = 2), 2000), nrow = 2000)
 
 
 set_10_4 <- rinvgauss(10, mean = 5, shape = 4)
@@ -46,13 +46,23 @@ apply(k, MARGIN  = 1, basicglm, link = 1, xmat = rep(1,10), random = 6) ->esters
 
 
 
-
+#The log liklihood of the inverse gaussian
 loglikinvgaus <- function(data, par){
   mu <- par[1]
   lambda <- par[2]
-  j <- -(sum(1/2*log(lambda) - 1/2*(log(2*pi))  -3/2*log(data)) - lambda/(2*mu^2)*sum((data-mu)^2/data))}
+  j <- -(sum(1/2*log(lambda) - 1/2*(log(2*pi))  -3/2*log(data)) - lambda/(2*mu^2)*sum((data-mu)^2/data))
+  }
 
-k <- optim(c(5,2), loglikinvgaus, data = set_500_2, hessian = T)
+
+for(i in 1:10){
+#finding MLE optims
+k <- optim(c(5,2), loglikinvgaus, data = set_500_2[i,], hessian = T)
 vcov <- solve(k$hessian)
-k$par %*% vcov %*% k$par
-k$par[1] + 1.96*vcov[1,1]
+
+#confidence interval
+upper <- k$par[1] + 1.96*vcov[1,1]
+lower <- k$par[1] - 1.96*vcov[1,1]
+
+count[i] <- 5 < upper & 5 > lower
+}
+
