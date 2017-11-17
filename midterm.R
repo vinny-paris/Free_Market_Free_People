@@ -1,7 +1,9 @@
-#library(statsmod)
-#library(boot)
-a
-set_10_2 <- rinvgauss(10, mean = 5, shape = 2)
+library(statmod)
+library(boot)
+
+
+
+set_10_2 <- matrix(rep(rinvgauss(10, mean = 5, shape = 2), 2000), nrow = 2000)
 set_25_2 <- rinvgauss(25, mean = 5, shape = 2)
 set_50_2 <- rinvgauss(50, mean = 5, shape = 2)
 set_100_2 <- rinvgauss(100, mean = 5, shape = 2)
